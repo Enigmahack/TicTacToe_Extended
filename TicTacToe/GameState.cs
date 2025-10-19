@@ -7,7 +7,8 @@ namespace TicTacToe
     {
 
         private Difficulty _aiDifficulty = Difficulty.Easy;
-        private Player _humanPlayer = Player.None;
+        private Player _humanPlayerSelection = Player.None;
+        private bool _aiEnabled = false;
         public Player[,] GameGrid { get; private set; }
         public Player CurrentPlayer { get; private set; }
         public Player ComputerPlayer { get; private set; }
@@ -23,19 +24,31 @@ namespace TicTacToe
                 }
             }
         }
-        public Player HumanPlayer 
+        public Player HumanPlayer { get; private set; }
+        public Player HumanPlayerSelection
         {
-            get => _humanPlayer;
+            get => _humanPlayerSelection;
             set
             {
-                if (_humanPlayer != value)
+                if (_humanPlayerSelection != value)
                 {
-                    _humanPlayer = value;
-                    OnPropertyChanged(nameof(HumanPlayer));
+                    _humanPlayerSelection = value;
+                    OnPropertyChanged(nameof(HumanPlayerSelection));
                 }
             }
-        } 
-        public bool AIEnabled { get; private set; }
+        }
+        public bool AIEnabled 
+        {
+            get => _aiEnabled;
+            set 
+            {
+                if (_aiEnabled != value) 
+                {
+                    _aiEnabled = value;
+                    OnPropertyChanged(nameof(AIEnabled));
+                }
+            }
+        }
         public int TurnsPassed { get; private set; }
         public bool GameOver { get; private set; }
 
@@ -57,6 +70,23 @@ namespace TicTacToe
             GameOver = false;
         }
 
+        public void StartGame()
+        {
+            if (AIEnabled)
+            {
+                CheckHumanPlayer();
+                SetComputerPlayer();
+            } else
+            {
+                ComputerPlayer = Player.None;
+            }
+
+            if (ComputerPlayer == Player.X)
+            {
+                HandleComputerTurn();
+            }
+        }
+
         internal bool CanMakeMove(int r, int c)
         {
             return !GameOver && GameGrid[r, c] == Player.None;
@@ -67,38 +97,106 @@ namespace TicTacToe
             return TurnsPassed == 9;
         }
 
-        private void SwitchPlayer()
+        internal void SwitchPlayer()
         {
-            CurrentPlayer = CurrentPlayer == Player.O ? Player.X : Player.O;
-            // Works like this: 
-            // Current player = if (Current Player is Player.O), then Player.X, else Player.O
-            // It works this way because there is only a single statement within each section. 
+            CurrentPlayer = CurrentPlayer == Player.O ? Player.X : Player.O; 
         }
 
-        public void ComputerPlayerActive(bool enable)
+        public Player GetOpponent(Player player)
         {
-            AIEnabled = enable; 
+            if (player == Player.X) return Player.O;
+            if (player == Player.O) return Player.X;
+            return Player.None;
         }
 
-        public void SetComputerPlayer(Player player)
+        // --- Minimax Helper Methods ---
+        /// Makes a move without firing events or checking for game over. Used for AI simulation.
+        public void MakeTemporaryMove(int r, int c)
         {
-            ComputerPlayer = player;
+            GameGrid[r, c] = CurrentPlayer;
+            TurnsPassed++;
+            SwitchPlayer();
+        }
+
+
+        /// Undoes a simulated move by reverting the grid, turn count, and player.
+        public void UndoTemporaryMove(int r, int c)
+        {
+            GameGrid[r, c] = Player.None;
+            TurnsPassed--;
+            SwitchPlayer(); // Switches the player back to who made the move
+        }
+
+        /// Checks the current grid state for a win or tie, ignoring the internal GameOver flag.
+        /// Returns GameResult if the game is over, otherwise null.
+        /// 
+        public GameResult CheckForWin()
+        {
+            // Check all 3 rows and 3 columns
+            for (int i = 0; i < 3; i++)
+            {
+                // Check Row i
+                if (GameGrid[i, 0] != Player.None && GameGrid[i, 0] == GameGrid[i, 1] && GameGrid[i, 0] == GameGrid[i, 2])
+                    return new GameResult { Winner = GameGrid[i, 0], WinInfo = new WinInfo { Type = WinType.Row, Number = i } };
+
+                // Check Column i
+                if (GameGrid[0, i] != Player.None && GameGrid[0, i] == GameGrid[1, i] && GameGrid[0, i] == GameGrid[2, i])
+                    return new GameResult { Winner = GameGrid[0, i], WinInfo = new WinInfo { Type = WinType.Column, Number = i } };
+            }
+
+            // Check main diagonal (top-left to bottom-right)
+            if (GameGrid[0, 0] != Player.None && GameGrid[0, 0] == GameGrid[1, 1] && GameGrid[0, 0] == GameGrid[2, 2])
+                return new GameResult { Winner = GameGrid[0, 0], WinInfo = new WinInfo { Type = WinType.LRDiag } };
+
+            // Check anti-diagonal (top-right to bottom-left)
+            if (GameGrid[0, 2] != Player.None && GameGrid[0, 2] == GameGrid[1, 1] && GameGrid[0, 2] == GameGrid[2, 0])
+                return new GameResult { Winner = GameGrid[0, 2], WinInfo = new WinInfo { Type = WinType.RLDiag } };
+
+            // Check for draw
+            if (TurnsPassed == 9)
+                return new GameResult { Winner = Player.None }; // Tie
+
+            return null; // Game not over
+        }
+
+
+        public void SetComputerPlayer()
+        {
+            if (HumanPlayer == Player.X)
+            {
+                ComputerPlayer = Player.O;
+            } 
+            else
+            {
+                ComputerPlayer = Player.X;
+            }
+        }
+
+        public void CheckHumanPlayer()
+        {
+            if(HumanPlayerSelection == Player.Random)
+            {
+                SetRandomPlayer();
+            }
+        }
+
+        public void SetRandomPlayer()
+        {
+            Random rand = new Random();
+            int i = rand.Next(2);
+            if (i == 0)
+            {
+                HumanPlayer = Player.X;
+            } else
+            {
+                HumanPlayer = Player.O;
+            }
         }
 
         public void SetHumanPlayer(Player player)
         {
+            HumanPlayerSelection = player;
             HumanPlayer = player;
-        }
-
-        public void SetPlayerRandomly()
-        {
-            HumanPlayer = Player.Random;
-        }
-
-        private void PlayerRandomize()
-        {
-            Player player = Random.Shared.Next(2) == 0 ? Player.X : Player.O;
-            SetHumanPlayer(player);
         }
 
         private bool AreSquaresMarked((int, int)[] squares, Player player)
@@ -209,10 +307,11 @@ namespace TicTacToe
         {
             GameGrid = new Player[3, 3];
             CurrentPlayer = Player.X;
-            ComputerPlayer = Player.None;
             TurnsPassed = 0;
             GameOver = false;
+            CheckHumanPlayer();
             GameRestarted?.Invoke();
+            StartGame();
         }
     }
 }

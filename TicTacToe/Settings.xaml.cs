@@ -24,16 +24,16 @@ namespace TicTacToe
             switch (myButton.Tag.ToString())
             {
                 case "X":
-                    gameState.SetHumanPlayer(Player.X); 
+                    gameState.SetHumanPlayer(Player.X);
                     break;
                 case "O":
-                    gameState.SetHumanPlayer(Player.O); 
+                    gameState.SetHumanPlayer(Player.O);
                     break;
                 case "Random":
-                    gameState.SetPlayerRandomly(); 
+                    gameState.SetHumanPlayer(Player.Random);
                     break;
                 default:
-                    gameState.SetHumanPlayer(Player.X); 
+                    gameState.SetHumanPlayer(Player.X);
                     break;
             }
         }
@@ -51,26 +51,6 @@ namespace TicTacToe
         private void Button_Click_OK(object sender, RoutedEventArgs e)
         {
             this.Close();
-        }
-
-        private void EnableComputer_ToggleButton_Checked(object sender, RoutedEventArgs e)
-        {
-           bool isEnabled = (sender as ToggleButton).IsChecked == true;
-
-            if (!isEnabled) 
-            {
-                DifficultySelect_Easy.IsEnabled = false;
-                DifficultySelect_Medium.IsEnabled = false;
-                DifficultySelect_Hard.IsEnabled = false;
-            } 
-            else
-            {
-                DifficultySelect_Easy.IsEnabled = true;
-                DifficultySelect_Medium.IsEnabled = true;
-                DifficultySelect_Hard.IsEnabled = true;
-            }
-
-                gameState.ComputerPlayerActive(isEnabled);
         }
     }
 }

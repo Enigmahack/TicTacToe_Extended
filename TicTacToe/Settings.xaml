@@ -31,7 +31,7 @@
             <Style.Triggers>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding HumanPlayer}" Value="X"/>
+                        <Condition Binding="{Binding HumanPlayerSelection}" Value="X"/>
 
                         <Condition Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="X"/>
                     </MultiDataTrigger.Conditions>
@@ -41,7 +41,7 @@
 
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding HumanPlayer}" Value="O"/>
+                        <Condition Binding="{Binding HumanPlayerSelection}" Value="O"/>
                         <Condition Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="O"/>
                     </MultiDataTrigger.Conditions>
                     <Setter Property="Background" Value="{StaticResource ActiveButtonColor}"/>
@@ -49,7 +49,7 @@
 
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding HumanPlayer}" Value="Random"/>
+                        <Condition Binding="{Binding HumanPlayerSelection}" Value="Random"/>
                         <Condition Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Random"/>
                     </MultiDataTrigger.Conditions>
                     <Setter Property="Background" Value="{StaticResource ActiveButtonColor}"/>
@@ -129,8 +129,30 @@
             Y2="2"
             />
 
-        <TextBlock
+        <TextBlock 
+            Text="Enable Computer Player"
+            ToolTip="Enables the computer player"
+            FontSize="34"
             Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"/>
+
+        <ToggleButton x:Name="EnableComputer_ToggleButton"
+                  Grid.Row="2"
+                  Grid.Column="1"
+                  VerticalAlignment="Center"
+                  HorizontalAlignment="Center"
+                  Background="#FFFFB966"
+                  Width="25"
+                  Height="25"
+                  BorderBrush="Black"
+                  IsChecked ="{Binding AIEnabled, Mode=TwoWay}">
+        </ToggleButton>
+
+        <TextBlock
+            Grid.Row="4"
             Grid.Column="0"
             Grid.ColumnSpan="3"
             Text="Player Piece"
@@ -146,9 +168,10 @@
             Width="50"
             Height="50"
             Click="Button_Click_PlayerSelect"
+            IsEnabled="{Binding AIEnabled}"
             Grid.Column="0"
-            Grid.Row="2"/>
-        
+            Grid.Row="5"/>
+
         <Button Content="O"
             x:Name="PlayerSelect_O"
             Tag="O"
@@ -157,8 +180,9 @@
             Width="50"
             Height="50"
             Click="Button_Click_PlayerSelect"
+            IsEnabled="{Binding AIEnabled}"
             Grid.Column="1"
-            Grid.Row="2"/>
+            Grid.Row="5"/>
 
         <Button Content="?"
             x:Name="PlayerSelect_Random"
@@ -168,31 +192,9 @@
             Width="50"
             Height="50"
             Click="Button_Click_PlayerSelect"
+            IsEnabled="{Binding AIEnabled}"
             Grid.Column="2"
-            Grid.Row="2"/>
-
-        <TextBlock 
-            Text="Enable Computer Player"
-            ToolTip="Enables the computer player"
-            FontSize="34"
-            Grid.Row="4"
-            Grid.Column="0"
-            Grid.ColumnSpan="3"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"/>
-
-        <ToggleButton x:Name="EnableComputer_ToggleButton"
-                  Grid.Row="5"
-                  Grid.Column="1"
-                  VerticalAlignment="Center"
-                  HorizontalAlignment="Center"
-                  Background="#FFFFB966"
-                  Width="25"
-                  Height="25"
-                  BorderBrush="Black"
-                  Checked="EnableComputer_ToggleButton_Checked"
-                  Unchecked="EnableComputer_ToggleButton_Checked">
-        </ToggleButton>
+            Grid.Row="5"/>
 
         <TextBlock
             Text="Computer Difficulty"
@@ -206,7 +208,7 @@
         <Button Content="Easy"
             x:Name="DifficultySelect_Easy"
             Style="{StaticResource DifficultyButtonType}"
-            IsEnabled="False"
+            IsEnabled="{Binding AIEnabled}"
             Tag="Easy"
             FontSize="26"
             Click="Button_Click_DifficultySelect"
@@ -218,7 +220,7 @@
             x:Name="DifficultySelect_Medium"
             Style="{StaticResource DifficultyButtonType}"
             Tag="Medium"
-            IsEnabled="False"
+            IsEnabled="{Binding AIEnabled}"
             FontSize="26"
             Click="Button_Click_DifficultySelect"
             Grid.Column="1"
@@ -228,7 +230,7 @@
             x:Name="DifficultySelect_Hard"
             Style="{StaticResource DifficultyButtonType}"
             Tag="Hard"
-            IsEnabled="False"
+            IsEnabled="{Binding AIEnabled}"
             FontSize="26"
             Click="Button_Click_DifficultySelect"
             Grid.Column="2"

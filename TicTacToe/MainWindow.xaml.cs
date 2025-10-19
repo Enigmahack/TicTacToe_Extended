@@ -1,27 +1,25 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace TicTacToe
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    /// 
 
     // TODO: 
-    // Implement CPU player, who goes first, and finalize code logic for different difficulty levels. 
-    // And add this to git. 
+    // Minor bugs with multi-player (2 player, not vs cpu) and re-testing start states
+
+
     public partial class MainWindow : Window
     {
-
         internal static double FadedOpacity = 0.1;
         internal static int UnfadedOpacity = 1;
         internal static double EndScreenOverlayOpacity = 0.6;
+
 
 
         private readonly Dictionary<Player, ImageSource> imageSources = new()
@@ -68,7 +66,6 @@ namespace TicTacToe
 
         }
 
-
         private void SetupGameGrid()
         {
             for (int r = 0; r < 3; r++)
@@ -80,6 +77,11 @@ namespace TicTacToe
                     imageControls[r, c] = imageControl;
                 }
             }
+        }
+
+        private void StartGame()
+        {
+            gameState.StartGame();
         }
 
         private void SetupAnimations()
@@ -269,11 +271,25 @@ namespace TicTacToe
         private void Button_Click_Start(object sender, RoutedEventArgs e)
         {
             WelcomeScreen.Visibility = Visibility.Hidden;
+            StartGame();
         }
 
-        private void Button_Click_Settings(object sender, RoutedEventArgs e)
+        private async void Button_Click_Settings(object sender, RoutedEventArgs e)
         {
-            ShowSettings();
+            Button button = (Button)sender;
+            button.IsEnabled = false;
+
+            try
+            {
+                // 1. Primary Action (e.g., Save, Start Game, etc.)
+                await ShowSettings(); // Use async/await for I/O or long tasks
+
+            }
+            finally
+            {
+                // Re-enable the button once the action is finished, even if an error occurred
+                button.IsEnabled = true;
+            }
         }
 
         private void Button_Click_Quit(object sender, RoutedEventArgs e)
@@ -281,10 +297,11 @@ namespace TicTacToe
             ShutDown();
         }
 
-        private void ShowSettings()
+        private Task ShowSettings()
         {
-            TicTacToe.Settings settingsWindow = new Settings(this.gameState);
-            settingsWindow.Show();
+            TicTacToe.Settings settingsWindow = new(this.gameState);
+            settingsWindow.ShowDialog();
+            return Task.CompletedTask;
         }
 
         private void ShutDown()
