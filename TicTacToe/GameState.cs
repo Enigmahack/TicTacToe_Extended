@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.ComponentModel;
 
 namespace TicTacToe
@@ -284,7 +285,11 @@ namespace TicTacToe
             {
                 SwitchPlayer();
                 MoveMade?.Invoke(r, c);
-                HandleComputerTurn();
+
+                if (!IsGridFull() && CurrentPlayer == ComputerPlayer)
+                {
+                    HandleComputerTurn();
+                }
             }
         } 
 
@@ -293,13 +298,13 @@ namespace TicTacToe
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void HandleComputerTurn()
+        private async void HandleComputerTurn()
         {
             if (CurrentPlayer == ComputerPlayer)
             {
-                (int r, int c) = computerMove.ComputerMakeMove(AIDifficulty, this);
+                (int r, int c) move = await Task.Run(() => computerMove.ComputerMakeMove(AIDifficulty, this));
 
-                MakeMove(r, c);
+                MakeMove(move.r, move.c);
             }
         }
 
